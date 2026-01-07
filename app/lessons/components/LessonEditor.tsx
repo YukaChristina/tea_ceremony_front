@@ -3,7 +3,7 @@
 import { useMemo, useState } from "react";
 
 type TabKey = "chashitsu" | "teishu" | "kyaku";
-type Mode = "read" | "new";
+type Mode = "read" | "new" | "edit";
 
 type LessonItem = {
   item_id: number;
@@ -39,14 +39,21 @@ type Props = {
   };
   // newモード用：保存のために親が受け取れるようにする（いまは未使用でもOK）
   onChangeDraft?: (draft: any) => void;
+  onSave?: (payload: { practiced_on: string; practice_name: string }) => Promise<void>;
+
 };
 
-export default function LessonEditor({ mode, lesson, tabs }: Props) {
+
+
+export default function LessonEditor({ mode, lesson, tabs, onSave }: Props) {
   const [active, setActive] = useState<TabKey>("chashitsu");
 
   // newモードの入力（最小）
   const [practiceName, setPracticeName] = useState(lesson.practice_name ?? "");
   const [practicedOn, setPracticedOn] = useState(lesson.practiced_on ?? "");
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const editable = mode === "new" || mode === "edit";
 
   const title = mode === "new" ? "稽古を記録する" : lesson.practice_name;
 
@@ -57,6 +64,29 @@ export default function LessonEditor({ mode, lesson, tabs }: Props) {
       kyaku: tabs.kyaku.entries.length,
     };
   }, [tabs]);
+
+  const handleSave = async () => {
+  if (!onSave) return;
+
+  if (!practicedOn || !practiceName) {
+    setError("稽古日と稽古名を入力してください");
+    return;
+  }
+
+  setSaving(true);
+  setError(null);
+
+  try {
+    await onSave({
+      practiced_on: practicedOn,
+      practice_name: practiceName,
+    });
+  } catch (e: any) {
+    setError(e?.message ?? "保存に失敗しました");
+  } finally {
+    setSaving(false);
+  }
+};
 
   return (
     <main style={{ padding: 24, maxWidth: 980, margin: "0 auto" }}>
@@ -208,7 +238,15 @@ export default function LessonEditor({ mode, lesson, tabs }: Props) {
       {/* newモードの保存ボタン（見た目だけ先） */}
       {mode === "new" && (
         <div style={{ marginTop: 22 }}>
-          <button style={buttonStyle}>保存</button>
+          {editable && (
+            <div style={{ marginTop: 22 }}>
+            {error && <div style={{ color: "crimson", marginBottom: 10 }}>{error}</div>}
+            <button style={buttonStyle} onClick={handleSave} disabled={saving}>
+                {saving ? "保存中..." : "保存"}
+            </button>
+        </div>
+)}
+
         </div>
       )}
     </main>
