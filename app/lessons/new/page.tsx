@@ -4,14 +4,11 @@ export default function NewLessonPage() {
   return (
     <LessonEditor
       mode="new"
-      lesson={{
-        practiced_on: "",
-        practice_name: "",
-        tabs: {
-          chashitsu: "",
-          teishu: "",
-          kyaku: "",
-        },
+      lesson={{ id: null, practiced_on: "", practice_name: "" }}
+      tabs={{
+        chashitsu: { items: [] },
+        teishu: { entries: [] },
+        kyaku: { entries: [] },
       }}
     />
   );
