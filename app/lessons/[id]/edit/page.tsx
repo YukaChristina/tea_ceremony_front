@@ -1,13 +1,71 @@
-import LessonEditor from "../../components/LessonEditor";
-import { fetchLesson } from "../../lib/fetchlesson";
+"use client";
 
-export default async function EditLessonPage({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
-  const { id } = await params;
-  const data = await fetchLesson(id);
+import { useEffect, useState } from "react";
+import { useParams } from "next/navigation";
+import LessonEditor from "../../components/LessonEditor";
+
+type LessonData = {
+  lesson: { id: number; practiced_on: string; practice_name: string };
+  tabs: {
+    chashitsu: { items: any[] };
+    teishu: { entries: any[] };
+    kyaku: { entries: any[] };
+  };
+};
+
+export default function EditLessonPage() {
+  const params = useParams();
+  const id = params.id as string;
+  const [data, setData] = useState<LessonData | null>(null);
+  const [photoUrls, setPhotoUrls] = useState<string[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
+    if (!baseUrl) return;
+    Promise.all([
+      fetch(`${baseUrl}/lessons/${id}`).then((r) => r.json()),
+      fetch(`${baseUrl}/lessons/${id}/photos`).then((r) => r.json()),
+    ]).then(([lessonData, photos]) => {
+      setData(lessonData);
+      setPhotoUrls(Array.isArray(photos) ? (photos as { url: string }[]).map((p) => p.url) : []);
+    }).finally(() => setLoading(false));
+  }, [id]);
+
+  const handleUpdate = async (payload: {
+    practiced_on: string;
+    practice_name: string;
+  }): Promise<{ lesson_id: number }> => {
+    const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
+    if (!baseUrl) throw new Error("NEXT_PUBLIC_API_BASE_URL is not set");
+
+    const res = await fetch(`${baseUrl}/lessons/${id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+
+    if (!res.ok) {
+      const text = await res.text();
+      throw new Error(`PATCH /lessons/${id} failed: ${res.status} ${text}`);
+    }
+
+    return res.json();
+  };
+
+  if (loading) {
+    return (
+      <main style={{ padding: 24, color: "var(--muted)" }}>読み込み中...</main>
+    );
+  }
+
+  if (!data) {
+    return (
+      <main style={{ padding: 24, color: "var(--muted)" }}>
+        稽古が見つかりませんでした。
+      </main>
+    );
+  }
 
   return (
     <LessonEditor
@@ -18,7 +76,8 @@ export default async function EditLessonPage({
         practice_name: data.lesson.practice_name,
       }}
       tabs={data.tabs}
-      // ここは次でPUT/PATCHに繋ぐ
+      initialPhotoUrls={photoUrls}
+      onSave={handleUpdate}
     />
   );
 }
