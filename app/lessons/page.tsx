@@ -7,8 +7,6 @@ type LessonListItem = {
   id: number;
   practiced_on: string;
   practice_name: string;
-  teishu_temae_name: string | null;
-  kyaku_temae_name: string | null;
 };
 
 export default function LessonsPage() {
@@ -17,9 +15,12 @@ export default function LessonsPage() {
   const [filterYear, setFilterYear] = useState("");
   const [filterMonth, setFilterMonth] = useState("");
   const [loading, setLoading] = useState(true);
+  const [matchIds, setMatchIds] = useState<Set<number> | null>(null);
+  const [searching, setSearching] = useState(false);
+
+  const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
 
   useEffect(() => {
-    const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
     if (!baseUrl) return;
     fetch(`${baseUrl}/lessons`, { cache: "no-store" })
       .then((r) => r.json())
@@ -27,23 +28,32 @@ export default function LessonsPage() {
       .finally(() => setLoading(false));
   }, []);
 
+  // キーワード検索：バックエンドの /search を使って全入力内容を対象にする
+  useEffect(() => {
+    if (!baseUrl) return;
+    const q = query.trim();
+    if (!q) { setMatchIds(null); return; }
+    setSearching(true);
+    fetch(`${baseUrl}/search?query=${encodeURIComponent(q)}&limit=200`)
+      .then((r) => r.json())
+      .then((data) => {
+        const ids = new Set<number>(Array.isArray(data) ? data.map((item: any) => item.lesson_id) : []);
+        setMatchIds(ids);
+      })
+      .finally(() => setSearching(false));
+  }, [query]);
+
   // ソート済みリストから年・月の選択肢を生成
   const sorted = lessons.slice().sort((a, b) => b.practiced_on.localeCompare(a.practiced_on));
   const years = Array.from(new Set(sorted.map((l) => l.practiced_on.slice(0, 4)))).sort((a, b) => b.localeCompare(a));
   const months = ["01","02","03","04","05","06","07","08","09","10","11","12"];
 
-  // 年・月・フリーワードで絞り込み
+  // 年・月・キーワードで絞り込み
   const filtered = sorted.filter((l) => {
     if (filterYear && l.practiced_on.slice(0, 4) !== filterYear) return false;
     if (filterMonth && l.practiced_on.slice(5, 7) !== filterMonth) return false;
-    if (!query) return true;
-    const haystack = [
-      l.practiced_on,
-      l.practice_name,
-      l.teishu_temae_name ?? "",
-      l.kyaku_temae_name ?? "",
-    ].join(" ").toLowerCase();
-    return query.toLowerCase().split(/\s+/).every((word) => haystack.includes(word));
+    if (matchIds !== null && !matchIds.has(l.id)) return false;
+    return true;
   });
 
   return (
@@ -85,23 +95,25 @@ export default function LessonsPage() {
       </div>
 
       {/* フリーワード検索 */}
-      <input
-        type="text"
-        placeholder="キーワードで検索..."
-        value={query}
-        onChange={(e) => setQuery(e.target.value)}
-        style={{
-          width: "100%",
-          padding: "10px 14px",
-          borderRadius: 4,
-          border: "1px solid var(--border)",
-          background: "var(--card)",
-          fontSize: 14,
-          color: "var(--foreground)",
-          marginBottom: 20,
-          boxSizing: "border-box",
-        }}
-      />
+      <div style={{ position: "relative", marginBottom: 20 }}>
+        <input
+          type="text"
+          placeholder="キーワードで検索（道具名・銘・メモなど）..."
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          style={{
+            width: "100%",
+            padding: "10px 14px",
+            borderRadius: 4,
+            border: "1px solid var(--border)",
+            background: "var(--card)",
+            fontSize: 14,
+            color: "var(--foreground)",
+            boxSizing: "border-box",
+          }}
+        />
+        {searching && <span style={{ position: "absolute", right: 12, top: "50%", transform: "translateY(-50%)", fontSize: 12, color: "var(--muted)" }}>検索中...</span>}
+      </div>
 
       {loading ? (
         <div style={{ color: "var(--muted)", padding: 12 }}>読み込み中...</div>
@@ -114,23 +126,9 @@ export default function LessonsPage() {
           {filtered.map((l) => (
             <div key={l.id} style={{ position: "relative" }}>
               <Link href={`/lessons/${l.id}`} style={{ textDecoration: "none", color: "inherit" }}>
-                <div
-                  style={{ border: "1px solid var(--border)", borderRadius: 6, padding: 16, display: "grid", gridTemplateColumns: "1.2fr 1fr", gap: 12, background: "var(--card)" }}
-                >
-                  <div>
-                    <div style={{ fontSize: 12, color: "var(--muted)", marginBottom: 6 }}>{l.practiced_on}</div>
-                    <div style={{ fontSize: 18, fontWeight: 700, lineHeight: 1.3, color: "var(--foreground)" }}>{l.practice_name}</div>
-                  </div>
-                  <div style={{ display: "grid", gap: 6, alignContent: "center" }}>
-                    <div style={{ fontSize: 13 }}>
-                      <span style={{ color: "var(--muted)" }}>亭主：</span>
-                      <span style={{ fontWeight: 700 }}>{l.teishu_temae_name ?? "—"}</span>
-                    </div>
-                    <div style={{ fontSize: 13 }}>
-                      <span style={{ color: "var(--muted)" }}>客：</span>
-                      <span style={{ fontWeight: 700 }}>{l.kyaku_temae_name ?? "—"}</span>
-                    </div>
-                  </div>
+                <div style={{ border: "1px solid var(--border)", borderRadius: 6, padding: 16, background: "var(--card)" }}>
+                  <div style={{ fontSize: 12, color: "var(--muted)", marginBottom: 6 }}>{l.practiced_on}</div>
+                  <div style={{ fontSize: 18, fontWeight: 700, lineHeight: 1.3, color: "var(--foreground)" }}>{l.practice_name}</div>
                 </div>
               </Link>
               <Link
