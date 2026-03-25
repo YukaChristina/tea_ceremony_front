@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import LessonEditor from "../../components/LessonEditor";
+import { apiFetch } from "../../../../lib/api";
 
 type LessonData = {
   lesson: { id: number; practiced_on: string; practice_name: string };
@@ -21,11 +22,9 @@ export default function EditLessonPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
-    if (!baseUrl) return;
     Promise.all([
-      fetch(`${baseUrl}/lessons/${id}`).then((r) => r.json()),
-      fetch(`${baseUrl}/lessons/${id}/photos`).then((r) => r.json()),
+      apiFetch(`/lessons/${id}`).then((r) => r.json()),
+      apiFetch(`/lessons/${id}/photos`).then((r) => r.json()),
     ]).then(([lessonData, photos]) => {
       setData(lessonData);
       setPhotoUrls(Array.isArray(photos) ? (photos as { url: string }[]).map((p) => p.url) : []);
@@ -36,10 +35,7 @@ export default function EditLessonPage() {
     practiced_on: string;
     practice_name: string;
   }): Promise<{ lesson_id: number }> => {
-    const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
-    if (!baseUrl) throw new Error("NEXT_PUBLIC_API_BASE_URL is not set");
-
-    const res = await fetch(`${baseUrl}/lessons/${id}`, {
+    const res = await apiFetch(`/lessons/${id}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),

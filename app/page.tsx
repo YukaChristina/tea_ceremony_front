@@ -1,6 +1,17 @@
+"use client";
+
 import Link from "next/link";
+import { createClient } from "../lib/supabase/client";
+import { useRouter } from "next/navigation";
 
 export default function Home() {
+  const router = useRouter();
+
+  const handleLogout = async () => {
+    const supabase = createClient();
+    await supabase.auth.signOut();
+    router.push("/login");
+  };
   return (
     <main
       style={{
@@ -84,6 +95,14 @@ export default function Home() {
         >
           アルバム
         </Link>
+
+        <button
+          onClick={handleLogout}
+          className="btn-tap"
+          style={{ padding: "16px 20px", borderRadius: 4, border: "1px solid var(--border)", background: "none", color: "var(--muted)", fontSize: 14, cursor: "pointer", letterSpacing: "0.05em" }}
+        >
+          ログアウト
+        </button>
       </div>
 
       {/* 装飾 */}

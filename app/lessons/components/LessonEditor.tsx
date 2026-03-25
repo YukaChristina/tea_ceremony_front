@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { apiFetch } from "../../../lib/api";
 
 type TabKey = "chashitsu" | "teishu" | "kyaku";
 type Mode = "read" | "new" | "edit";
@@ -179,7 +180,6 @@ export default function LessonEditor({ mode, lesson, tabs, initialPhotoUrls, onS
     setError(null);
     setSaved(false);
     try {
-      const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL!;
       const tf = teishuForm;
       const kf = kyakuForm;
       const tfShelfPart = tf.hasShelf === "あり" ? (tf.shelfName || "棚あり") : "なし";
@@ -189,23 +189,23 @@ export default function LessonEditor({ mode, lesson, tabs, initialPhotoUrls, onS
       const { lesson_id } = await onSave({ practiced_on: practicedOn, practice_name: composedName });
 
       const postItem = async (body: object) => {
-        const res = await fetch(`${baseUrl}/lessons/${lesson_id}/items`, {
-          method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body),
+        const res = await apiFetch(`/lessons/${lesson_id}/items`, {
+          method: "POST", body: JSON.stringify(body),
         });
         if (!res.ok) throw new Error(`アイテム保存失敗: ${res.status} ${await res.text()}`);
       };
       const postEntry = (body: object) =>
-        fetch(`${baseUrl}/lessons/${lesson_id}/role-entries`, {
-          method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body),
+        apiFetch(`/lessons/${lesson_id}/role-entries`, {
+          method: "POST", body: JSON.stringify(body),
         }).then((r) => r.json());
 
       const has = (...vals: string[]) => vals.some((v) => v.trim() !== "");
 
       if (mode === "edit") {
         // 編集時は既存アイテム・エントリを全削除してから再登録
-        const delItems = await fetch(`${baseUrl}/lessons/${lesson_id}/items`, { method: "DELETE" });
+        const delItems = await apiFetch(`/lessons/${lesson_id}/items`, { method: "DELETE" });
         if (!delItems.ok) throw new Error(`アイテム削除失敗: ${delItems.status} ${await delItems.text()}`);
-        const delEntries = await fetch(`${baseUrl}/lessons/${lesson_id}/role-entries`, { method: "DELETE" });
+        const delEntries = await apiFetch(`/lessons/${lesson_id}/role-entries`, { method: "DELETE" });
         if (!delEntries.ok) throw new Error(`エントリ削除失敗: ${delEntries.status} ${await delEntries.text()}`);
       }
 
@@ -274,9 +274,8 @@ export default function LessonEditor({ mode, lesson, tabs, initialPhotoUrls, onS
           );
           if (!uploadRes.ok) throw new Error(`写真アップロード失敗: ${uploadRes.status}`);
           const { secure_url } = await uploadRes.json();
-          const saveRes = await fetch(`${baseUrl}/lessons/${lesson_id}/photos`, {
+          const saveRes = await apiFetch(`/lessons/${lesson_id}/photos`, {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ url: secure_url }),
           });
           if (!saveRes.ok) throw new Error(`写真URL保存失敗: ${saveRes.status}`);

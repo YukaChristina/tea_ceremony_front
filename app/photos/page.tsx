@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
+import { apiFetch } from "../../lib/api";
 
 type Photo = {
   id: number;
@@ -32,13 +33,10 @@ export default function PhotosPage() {
   const [uploadError, setUploadError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
-
   useEffect(() => {
-    if (!baseUrl) return;
     Promise.all([
-      fetch(`${baseUrl}/photos`).then((r) => r.json()),
-      fetch(`${baseUrl}/lessons`).then((r) => r.json()),
+      apiFetch("/photos").then((r) => r.json()),
+      apiFetch("/lessons").then((r) => r.json()),
     ]).then(([photoData, lessonData]) => {
       setPhotos(Array.isArray(photoData) ? photoData : []);
       setLessons(Array.isArray(lessonData) ? lessonData : []);
@@ -67,9 +65,8 @@ export default function PhotosPage() {
         if (!uploadRes.ok) throw new Error(`アップロード失敗: ${uploadRes.status}`);
         const { secure_url } = await uploadRes.json();
 
-        const saveRes = await fetch(`${baseUrl}/lessons/${uploadLessonId}/photos`, {
+        const saveRes = await apiFetch(`/lessons/${uploadLessonId}/photos`, {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ url: secure_url }),
         });
         if (!saveRes.ok) throw new Error(`保存失敗: ${saveRes.status}`);

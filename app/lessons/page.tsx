@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { apiFetch } from "../../lib/api";
 
 type LessonListItem = {
   id: number;
@@ -18,11 +19,8 @@ export default function LessonsPage() {
   const [matchIds, setMatchIds] = useState<Set<number> | null>(null);
   const [searching, setSearching] = useState(false);
 
-  const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
-
   useEffect(() => {
-    if (!baseUrl) return;
-    fetch(`${baseUrl}/lessons`, { cache: "no-store" })
+    apiFetch("/lessons")
       .then((r) => r.json())
       .then((data) => setLessons(data))
       .finally(() => setLoading(false));
@@ -30,11 +28,10 @@ export default function LessonsPage() {
 
   // キーワード検索：バックエンドの /search を使って全入力内容を対象にする
   useEffect(() => {
-    if (!baseUrl) return;
     const q = query.trim();
     if (!q) { setMatchIds(null); return; }
     setSearching(true);
-    fetch(`${baseUrl}/search?query=${encodeURIComponent(q)}&limit=200`)
+    apiFetch(`/search?query=${encodeURIComponent(q)}&limit=200`)
       .then((r) => r.json())
       .then((data) => {
         const results = Array.isArray(data) ? data : (data.results ?? []);
