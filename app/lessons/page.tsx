@@ -37,7 +37,8 @@ export default function LessonsPage() {
     fetch(`${baseUrl}/search?query=${encodeURIComponent(q)}&limit=200`)
       .then((r) => r.json())
       .then((data) => {
-        const ids = new Set<number>(Array.isArray(data) ? data.map((item: any) => item.lesson_id) : []);
+        const results = Array.isArray(data) ? data : (data.results ?? []);
+        const ids = new Set<number>(results.map((item: any) => item.lesson_id));
         setMatchIds(ids);
       })
       .finally(() => setSearching(false));
