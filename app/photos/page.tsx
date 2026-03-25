@@ -191,14 +191,20 @@ export default function PhotosPage() {
           まだ写真がありません。「写真を追加」から登録してください。
         </div>
       ) : (
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 4 }}>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 8 }}>
           {photos.map((p) => (
             <button
               key={p.id}
               onClick={() => setSelected(p)}
-              style={{ padding: 0, border: "none", background: "none", cursor: "pointer", aspectRatio: "1", overflow: "hidden" }}
+              style={{ padding: 0, border: "none", background: "var(--card)", cursor: "pointer", borderRadius: 4, overflow: "hidden", textAlign: "left" }}
             >
-              <img src={p.url} alt="" style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
+              <div style={{ aspectRatio: "1", overflow: "hidden" }}>
+                <img src={p.url} alt="" style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
+              </div>
+              <div style={{ padding: "6px 8px" }}>
+                <div style={{ fontSize: 11, color: "var(--muted)", marginBottom: 2 }}>{p.practiced_on}</div>
+                <div style={{ fontSize: 12, color: "var(--foreground)", fontWeight: 500, lineHeight: 1.3, overflow: "hidden", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical" }}>{p.practice_name}</div>
+              </div>
             </button>
           ))}
         </div>
