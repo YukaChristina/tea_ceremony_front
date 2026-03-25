@@ -36,6 +36,7 @@ export default function Home() {
       <div style={{ display: "flex", flexDirection: "column", gap: 14, width: "100%", maxWidth: 280 }}>
         <Link
           href="/lessons/new"
+          className="btn-tap"
           style={{
             padding: "16px 20px",
             borderRadius: 4,
@@ -52,6 +53,7 @@ export default function Home() {
 
         <Link
           href="/lessons"
+          className="btn-tap"
           style={{
             padding: "16px 20px",
             borderRadius: 4,
@@ -68,6 +70,7 @@ export default function Home() {
 
         <Link
           href="/photos"
+          className="btn-tap"
           style={{
             padding: "16px 20px",
             borderRadius: 4,

@@ -1,8 +1,13 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #f7f3ea;
+  --foreground: #2c2416;
+  --accent: #4a7c59;
+  --accent-light: #d4e8d8;
+  --border: #d6c9b0;
+  --card: #fdfaf3;
+  --muted: #8a7560;
 }
 
 @theme inline {
@@ -12,15 +17,16 @@
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: "Hiragino Mincho ProN", "Yu Mincho", Georgia, serif;
+}
+
+.btn-tap {
+  transition: opacity 0.1s, transform 0.1s;
+}
+.btn-tap:active {
+  opacity: 0.6;
+  transform: scale(0.97);
 }
