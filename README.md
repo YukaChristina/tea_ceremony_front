@@ -1,36 +1,99 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 稽古記録アプリ — Urasenke Practice Log
 
-## Getting Started
+裏千家のお稽古を記録・振り返るためのWebアプリです。
+スマートフォンからも使えるので、稽古の直後にその場で記録できます。
 
-First, run the development server:
+---
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+## できること
+
+### 稽古を記録する
+稽古日・季節・使用した道具を、タブ形式で整理して記録します。
+
+**茶室タブ**
+- お菓子（御生・銘）
+- 掛け軸
+- 花
+- その他（自由に項目追加可）
+
+**亭主タブ / 客タブ（それぞれ独立して入力）**
+- お茶の種類（薄茶 / 濃茶）
+- 棚の有無・棚名
+- 稽古名（例：貴人点て、大円草）
+- 茶碗（御生・作者・銘・メモ）
+- 茶杓（作者・銘・メモ）
+- 茶器（塗り・形 / 濃茶の場合は窯元）
+- 仕覆（切地・仕立て）※濃茶のみ
+- メモ
+
+亭主と客で**別々に**お茶の種類・棚・稽古名を設定できるのがポイントです。
+
+### 稽古を振り返る
+過去の稽古を一覧で確認できます。
+
+- 年・月のプルダウンで絞り込み
+- キーワード検索（道具名・銘・作者・メモなど**すべての入力内容**が対象）
+
+### アルバム
+稽古中に撮った写真を管理します。
+
+- 写真をアップロードして稽古に紐付け
+- サムネイル一覧で見やすく表示（日付・稽古名付き）
+- 写真をタップすると拡大表示＋該当の稽古へリンク
+- アルバム画面から直接アップロードも可能
+
+---
+
+## 凄いところ
+
+### 亭主と客で独立した記録
+同じ稽古でも、亭主として薄茶の平点前、客として濃茶の大円草を学んだ場合、それぞれ独立して記録できます。従来のノートや一般的なメモアプリでは管理しにくかった「役割ごとの記録」をシームレスに実現しています。
+
+### 道具の横断検索
+「この茶碗、前にも使ったな」という時に、銘や作者の一部をキーワードで入力するだけで、過去のすべての稽古から該当する記録を瞬時に見つけられます。稽古名だけでなく、道具のあらゆる情報が検索対象です。
+
+### 写真と記録の連携
+アルバムの写真から、その日の稽古記録へ直接飛べます。道具の写真と文字の記録が一体となって管理できます。
+
+### スマートフォン対応
+稽古の場でその場で記録できるよう、スマートフォンからでも快適に使えます。
+
+---
+
+## 技術構成
+
+| 項目 | 使用技術 |
+|------|---------|
+| フロントエンド | Next.js 15 (App Router) / TypeScript |
+| バックエンド | FastAPI (Python) |
+| データベース | Supabase (PostgreSQL) |
+| 画像ストレージ | Cloudinary |
+| フロントホスティング | Vercel |
+| バックエンドホスティング | Render |
+
+---
+
+## 将来の拡張予定
+
+- **言語切り替え**（日本語 / 英語）— 外国人の方にも使えるように
+- **複数人対応**（ログイン機能）— 複数の生徒が各自の稽古を記録
+- **クラス共有**— クラス単位で写真や記録を共有
+- **管理者権限**— 師匠がクラス全体の記録を俯瞰できる機能
+
+データベース設計はこれらの拡張を見越した構造になっています。
+
+---
+
+## ディレクトリ構成
+
 ```
-
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
-
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
-
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+tea_ceremony_app/
+├── frontend/frontend/   # Next.js アプリ
+│   └── app/
+│       ├── page.tsx           # トップ画面
+│       ├── lessons/           # 稽古記録・一覧
+│       └── photos/            # アルバム
+└── backend/             # FastAPI アプリ
+    ├── main.py          # APIエンドポイント
+    └── db.py            # データベース接続
+```
