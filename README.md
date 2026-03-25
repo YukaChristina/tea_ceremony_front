@@ -84,6 +84,69 @@
 
 ---
 
+## データベース設計
+
+```mermaid
+erDiagram
+    users {
+        int id PK
+        varchar email
+        varchar display_name
+        varchar role
+        timestamp created_at
+    }
+
+    lessons {
+        int id PK
+        int user_id FK
+        date practiced_on
+        varchar practice_name
+        timestamp created_at
+    }
+
+    role_entries {
+        int id PK
+        int lesson_id FK
+        varchar role
+        varchar temae_name
+        text note
+        timestamp created_at
+    }
+
+    lesson_items {
+        int id PK
+        int lesson_id FK
+        int role_entry_id FK
+        varchar section
+        varchar item_type
+        varchar title
+        varchar mei
+        varchar maker
+        text note
+        timestamp created_at
+    }
+
+    lesson_photos {
+        int id PK
+        int lesson_id FK
+        int user_id FK
+        varchar url
+        timestamp created_at
+    }
+
+    users ||--o{ lessons : "所有"
+    users ||--o{ lesson_photos : "所有"
+    lessons ||--o{ role_entries : "亭主／客"
+    lessons ||--o{ lesson_items : "道具・茶室"
+    lessons ||--o{ lesson_photos : "写真"
+    role_entries ||--o{ lesson_items : "役割別道具"
+```
+
+> `role_entries.temae_name` には `薄茶/なし/貴人点て` の形式で茶種・棚・稽古名を格納し、亭主と客で独立して管理しています。
+> `lesson_items.role_entry_id` が NULL の場合は茶室（chashitsu）アイテムとして扱います。
+
+---
+
 ## ディレクトリ構成
 
 ```
