@@ -22,7 +22,7 @@ export default function LessonsPage() {
   useEffect(() => {
     apiFetch("/lessons")
       .then((r) => r.json())
-      .then((data) => setLessons(data))
+      .then((data) => setLessons(Array.isArray(data) ? data : []))
       .finally(() => setLoading(false));
   }, []);
 
