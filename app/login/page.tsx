@@ -25,19 +25,9 @@ export default function LoginPage() {
     setLoading(false);
   };
 
-  const handleDemoLogin = async () => {
-    setLoading(true);
-    setError(null);
-    const { error } = await supabase.auth.signInWithPassword({
-      email: process.env.NEXT_PUBLIC_DEMO_EMAIL!,
-      password: process.env.NEXT_PUBLIC_DEMO_PASSWORD!,
-    });
-    if (error) {
-      setError("デモログインに失敗しました");
-    } else {
-      router.push("/");
-    }
-    setLoading(false);
+  const handleDemoFill = () => {
+    setEmail(process.env.NEXT_PUBLIC_DEMO_EMAIL!);
+    setPassword(process.env.NEXT_PUBLIC_DEMO_PASSWORD!);
   };
 
   const handleGoogleLogin = async () => {
@@ -125,9 +115,8 @@ export default function LoginPage() {
             アカウントなしで試したい方
           </p>
           <button
-            onClick={handleDemoLogin}
-            disabled={loading}
-            style={{ width: "100%", padding: "12px", borderRadius: 4, border: "1px dashed var(--border)", background: "var(--background)", color: "var(--muted)", fontSize: 14, cursor: loading ? "not-allowed" : "pointer", opacity: loading ? 0.7 : 1 }}
+            onClick={handleDemoFill}
+            style={{ width: "100%", padding: "12px", borderRadius: 4, border: "1px dashed var(--border)", background: "var(--background)", color: "var(--muted)", fontSize: 14, cursor: "pointer" }}
           >
             デモを試す
           </button>
