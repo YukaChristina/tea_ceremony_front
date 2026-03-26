@@ -25,6 +25,21 @@ export default function LoginPage() {
     setLoading(false);
   };
 
+  const handleDemoLogin = async () => {
+    setLoading(true);
+    setError(null);
+    const { error } = await supabase.auth.signInWithPassword({
+      email: process.env.NEXT_PUBLIC_DEMO_EMAIL!,
+      password: process.env.NEXT_PUBLIC_DEMO_PASSWORD!,
+    });
+    if (error) {
+      setError("デモログインに失敗しました");
+    } else {
+      router.push("/");
+    }
+    setLoading(false);
+  };
+
   const handleGoogleLogin = async () => {
     setError(null);
     await supabase.auth.signInWithOAuth({
@@ -105,7 +120,20 @@ export default function LoginPage() {
           </button>
         </div>
 
-        <p style={{ textAlign: "center", fontSize: 12, color: "var(--muted)", marginTop: 32 }}>
+        <div style={{ marginTop: 28, borderTop: "1px solid var(--border)", paddingTop: 24 }}>
+          <p style={{ textAlign: "center", fontSize: 12, color: "var(--muted)", marginBottom: 12 }}>
+            アカウントなしで試したい方
+          </p>
+          <button
+            onClick={handleDemoLogin}
+            disabled={loading}
+            style={{ width: "100%", padding: "12px", borderRadius: 4, border: "1px dashed var(--border)", background: "var(--background)", color: "var(--muted)", fontSize: 14, cursor: loading ? "not-allowed" : "pointer", opacity: loading ? 0.7 : 1 }}
+          >
+            デモを試す
+          </button>
+        </div>
+
+        <p style={{ textAlign: "center", fontSize: 12, color: "var(--muted)", marginTop: 20 }}>
           ※招待制です。アカウントをお持ちでない方は管理者にお問い合わせください。
         </p>
       </div>
