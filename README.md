@@ -96,6 +96,26 @@ Supabase ダッシュボード > **Authentication** > **Users** > **Invite user*
 
 ---
 
+## データバックアップ
+
+### 自動バックアップ（GitHub Actions）
+毎週月曜 AM10:00（JST）に自動でデータをエクスポートします。
+
+| 項目 | 内容 |
+|------|------|
+| 対象テーブル | users / lessons / role_entries / lesson_items / lesson_photos |
+| 保存形式 | CSV |
+| 保存先 | `tea_ceremony_back` リポジトリの `backups/` フォルダ |
+| 設定ファイル | `.github/workflows/backup.yml` |
+
+### バックアップの確認方法
+GitHub > `tea_ceremony_back` > `backups/` フォルダを開くと各テーブルの CSV が確認できます。
+
+### 手動実行
+GitHub > `tea_ceremony_back` > **Actions** > **Weekly Database Backup** > **Run workflow** から任意のタイミングで実行できます。
+
+---
+
 ## 将来の拡張予定
 
 - **言語切り替え**（日本語 / 英語）— 外国人の方にも使えるように
