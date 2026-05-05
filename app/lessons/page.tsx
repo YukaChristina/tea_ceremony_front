@@ -21,8 +21,15 @@ export default function LessonsPage() {
 
   useEffect(() => {
     apiFetch("/lessons")
-      .then((r) => r.json())
-      .then((data) => setLessons(Array.isArray(data) ? data : []))
+      .then((r) => {
+        console.log("[debug] /lessons status:", r.status, r.ok);
+        return r.json();
+      })
+      .then((data) => {
+        console.log("[debug] /lessons response:", JSON.stringify(data));
+        setLessons(Array.isArray(data) ? data : []);
+      })
+      .catch((err) => console.error("[debug] /lessons error:", err))
       .finally(() => setLoading(false));
   }, []);
 
